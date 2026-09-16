@@ -1,7 +1,7 @@
 ---
 title: 'ISE Week 1'
 description: 'Freshers Week'
-pubDate: '9th of September 2026'
+pubDate: 'Sep 09 2026'
 heroImage: 'my-astro-blog\src\assets\fonts\ISE-Logo.png'
 ---
 
