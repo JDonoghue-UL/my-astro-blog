@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
@@ -8,7 +8,8 @@ import Header from '../components/Header.astro';
 
 type Props = CollectionEntry<'blog'>['data'];
 
-const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, author } = Astro.props;
+const authorEntry = author ? await getEntry('authors', author) : undefined;
 ---
 
 <html lang="en">
@@ -52,6 +53,33 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 			.last-updated-on {
 				font-style: italic;
 			}
+			.author-bio {
+				display: flex;
+				gap: 1em;
+				align-items: center;
+				margin-top: 3em;
+				padding-top: 1.5em;
+				border-top: 1px solid rgb(var(--gray-light));
+			}
+			.author-bio img {
+				width: 72px;
+				height: 72px;
+				flex: 0 0 72px;
+				object-fit: cover;
+				border-radius: 50%;
+			}
+			.author-bio h2,
+			.author-bio p {
+				margin: 0;
+			}
+			.author-bio h2 {
+				font-size: 1.1em;
+			}
+			@media (max-width: 480px) {
+				.author-bio {
+					align-items: flex-start;
+				}
+			}
 		</style>
 	</head>
 
@@ -78,6 +106,15 @@ const { title, description, pubDate, updatedDate, heroImage } = Astro.props;
 						<hr />
 					</div>
 					<slot />
+					{authorEntry && (
+						<aside class="author-bio">
+							<Image src={authorEntry.data.photo} width={72} height={72} alt={authorEntry.data.name} />
+							<div>
+								<h2>About {authorEntry.data.name}</h2>
+								<p>{authorEntry.data.bio}</p>
+							</div>
+						</aside>
+					)}
 				</div>
 			</article>
 		</main>
