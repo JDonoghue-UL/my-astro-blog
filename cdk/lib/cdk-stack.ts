@@ -21,5 +21,10 @@ destinationBucket: siteBucket,
 distribution,
 distributionPaths: ['/*'], 
 });
+
+new cdk.CfnOutput(this, 'SiteUrl', {
+value: `https://${distribution.distributionDomainName}`,
+description: 'CloudFront URL for the deployed site',
+});
 }
 }
