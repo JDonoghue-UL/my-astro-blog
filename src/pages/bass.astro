@@ -710,6 +710,10 @@ E|------------------------------9----7---------------------------------------:|`
 		border-top: 1px solid rgb(var(--gray-light));
 		border-radius: 0;
 		box-shadow: none;
+		position: sticky;
+		bottom: 0;
+		z-index: 2;
+		background: rgba(30, 41, 59, 0.98);
 	}
 	.tab-heading {
 		display: flex;
@@ -736,14 +740,15 @@ E|------------------------------9----7---------------------------------------:|`
 	}
 	.tablature {
 		overflow-x: auto;
+		max-height: 18em;
 		margin: 1.25em 0 0;
 		padding: 1em;
 		border: 1px solid rgb(var(--gray-light));
-		background: var(--page-background);
-		color: #d6bf8c;
+		background: #0a1020;
+		color: #f7e5ba;
 		font-family: 'Courier New', monospace;
-		font-size: clamp(0.5em, 1.2vw, 0.72em);
-		line-height: 1.6;
+		font-size: clamp(0.68em, 1.5vw, 0.9em);
+		line-height: 1.8;
 		white-space: pre;
 	}
 	.controls h2 {
