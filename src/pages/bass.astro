@@ -141,6 +141,7 @@ import Header from '../components/Header.astro';
 						</select>
 						<label for="scale-select">Scale</label>
 						<select id="scale-select">
+							<option value="none">No scale</option>
 							<option value="major">Major</option>
 							<option value="minor">Natural minor</option>
 							<option value="majorPentatonic">Major pentatonic</option>
@@ -440,6 +441,14 @@ E|------------------------------9----7---------------------------------------:|`
 	});
 
 	const updateScale = () => {
+		if (scaleSelect.value === 'none') {
+			scaleName.textContent = 'No scale selected';
+			scaleNotes.textContent = 'Scale highlighting is off';
+			neck.querySelectorAll('.fret').forEach((button) => {
+				button.classList.remove('scale-note', 'root-note');
+			});
+			return;
+		}
 		const root = noteNames.indexOf(rootSelect.value);
 		const scale = scales[scaleSelect.value];
 		const scalePitchClasses = new Set(scale.intervals.map((interval) => (root + interval) % 12));
