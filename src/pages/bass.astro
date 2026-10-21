@@ -36,11 +36,12 @@ import Header from '../components/Header.astro';
 					</div>
 				</div>
 
+				<div class="practice-area">
 				<div class="neck" id="neck">
 					<div class="nut" aria-hidden="true"></div>
 					<div class="fret-numbers" aria-hidden="true">
-						<span>0</span>
-						{Array.from({ length: 12 }, (_, index) => <span>{index + 1}</span>)}
+						<span></span>
+						{Array.from({ length: 13 }, (_, index) => <span>{index}</span>)}
 					</div>
 					{
 						[
@@ -76,6 +77,27 @@ import Header from '../components/Header.astro';
 							</div>
 						))
 					}
+				</div>
+				<section class="tabs" aria-labelledby="tabs-heading">
+					<div class="tab-heading">
+						<div>
+							<p class="eyebrow">Bass line</p>
+							<h2 id="tabs-heading">Hysteria</h2>
+							<p>Play along with the tab below.</p>
+						</div>
+						<div class="tab-actions">
+							<label for="tab-select">Choose a tab</label>
+							<select id="tab-select">
+								<option value="hysteria">Hysteria</option>
+								<option value="dani-california">Dani California</option>
+								<option value="santeria">Santeria</option>
+								<option value="fluorescent-adolescent">Fluorescent Adolescent</option>
+							</select>
+							<button class="audio-button" id="tab-button" type="button">Play tab</button>
+						</div>
+					</div>
+					<pre class="tablature" id="tablature" aria-label="Hysteria bass tab"></pre>
+				</section>
 				</div>
 			</section>
 
@@ -133,6 +155,7 @@ import Header from '../components/Header.astro';
 					<span id="scale-notes">E · F# · G# · A · B · C# · D#</span>
 				</div>
 			</section>
+
 		</main>
 		<Footer />
 	</body>
@@ -148,6 +171,10 @@ import Header from '../components/Header.astro';
 	const scaleSelect = document.querySelector('#scale-select');
 	const scaleName = document.querySelector('#scale-name');
 	const scaleNotes = document.querySelector('#scale-notes');
+	const tabButton = document.querySelector('#tab-button');
+	const tabSelect = document.querySelector('#tab-select');
+	const tabTitle = document.querySelector('#tabs-heading');
+	const tablature = document.querySelector('#tablature');
 	const keyboardRows = {
 		'`': { string: 'G', keys: ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='] },
 		q: { string: 'D', keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'] },
@@ -171,6 +198,7 @@ import Header from '../components/Header.astro';
 	};
 	let activeString = 'G';
 	let audioContext;
+	let tabTimer;
 
 	const getAudioContext = () => {
 		audioContext ??= new AudioContext();
@@ -231,6 +259,169 @@ import Header from '../components/Header.astro';
 		activeString = stringName;
 		playNote(midi, `${stringName} string · fret ${fret === 0 ? 'open' : fret}`, button);
 	};
+
+	const hysteriaText = `G|------------------------------------------------------------------------|
+D|------------------------------------------------------------------------|
+A|-0-0-10-0-10-12-0-10-0-7-0-8-8-7-5-7------------------------------------|
+E|-------------------------------------0-0-10-0-10-12-0-15-0-12-0-15-15-12|
+
+G|-------------------------------------------------------------------------|
+D|-------0-0-10-0-10-12-0-10-0-10-9-0-9-8-0-8-7----------------------------|
+A|----------------------------------------------0-10-0-10-12-0-10-0-7-0-8-8|
+E|-15-17-------------------------------------------------------------------|
+
+G|------|
+D|------|
+A|-7-5-7|
+E|------|`;
+	const tabDefinitions = {
+		hysteria: {
+			title: 'Hysteria',
+			text: hysteriaText,
+			notes: [
+				['A', 0], ['A', 0], ['A', 10], ['A', 0], ['A', 10], ['A', 12], ['A', 0], ['A', 10], ['A', 0], ['A', 7], ['A', 0], ['A', 8], ['A', 8], ['A', 7], ['A', 5], ['A', 7],
+				['E', 0], ['E', 0], ['E', 10], ['E', 0], ['E', 10], ['E', 12], ['E', 0], ['E', 15], ['E', 0], ['E', 12], ['E', 0], ['E', 15], ['E', 15], ['E', 12], ['E', 15], ['E', 17],
+				['D', 0], ['D', 0], ['D', 10], ['D', 0], ['D', 10], ['D', 12], ['D', 0], ['D', 10], ['D', 0], ['D', 10], ['D', 9], ['D', 0], ['D', 9], ['D', 8], ['D', 0], ['D', 8], ['D', 7],
+				['A', 0], ['A', 10], ['A', 0], ['A', 10], ['A', 12], ['A', 0], ['A', 10], ['A', 0], ['A', 7], ['A', 0], ['A', 8], ['A', 8], ['A', 7], ['A', 5], ['A', 7],
+			],
+		},
+		'dani-california': {
+			title: 'Dani California',
+			text: `G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7------------|
+D|-----7------5-3-------7----------|
+A|----------------5-5------3-5-5---|
+E|-5-5----3-3------------5---------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7----------------|
+D|-----7------5-3--------------5-------|
+A|----------------5-5----5h7p5---7-----|
+E|-5-5----3-3----------------------5---|
+
+G|--------------------7-----5----------|
+D|-----7------5-3-------5h7---5---5----|
+A|----------------5-5-----------7------|
+E|-5-5----3-3--------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5--5---5------|
+A|----------------5-5------------7---7----|
+E|-5-5----3-3-----------------------------|`,
+		},
+		santeria: {
+			title: 'Santeria',
+			text: `G|-----------------------8--------------|
+D|---------6----------------------------|
+A|--7-------------4----------------7h9--|
+E|-----------------------7------7h9-----|
+
+G|----------------------------------------------|
+D|---------------7h9-7h9---6--6---6-6--0-6-6----|
+A|--7--7---7-7-----------------6h8--------------|
+E|------7h9-------------------------------------|
+
+G|--------------------------------------------|
+D|--------------------------------------------|
+A|--4--4-4--4-4--4-4-------------------7h9----|
+E|---------------------7--0-7-7-7--07h9-------|
+
+G|---------------------------------------------|
+D|---------------7h9-7h9---6--6----------------|
+A|--7--7---7-7-----------------6-6--------4h6--|
+E|------7h9------------------------4--04h6-----|
+
+G|-------------------------------------------|
+D|-------------------------------------------|
+A|--4--4---4-4---0-4-7-----------------------|
+E|------4h6------------7--0-7-7-7-7-7-7------|`,
+		},
+		'fluorescent-adolescent': {
+			title: 'Fluorescent Adolescent',
+			text: `G|-----------------------------|
+D|---------------444-----------|
+A|-7-7-7--4-4-4-------2-2-2----|
+E|-----------------------------|
+
+G|--------------6-----6---4--------6-----4--4--------|
+D|--2------------------------4-----------------------|
+A|-----------2-4----4---2-------------2----2---------|
+E|-0---0-2-4----------------2---2-2-----------3/4-2--|
+
+G|---------------------------------------------------------------------------:|
+D|----------------9-11-11-11-11---11---9----------------11-9-9-9-9----9------:|
+A|-7-7-7-7-7-9/11-------------------------9-9-9-9-9-9-9------------11---11-9-:|
+E|------------------------------9----7---------------------------------------:|`,
+		},
+	};
+
+	const parseTabNotes = (text) => text.split('\n').flatMap((line) => {
+		const match = line.match(/^([GDAE])\|([^|]*)/);
+		if (!match) return [];
+		return [...match[2].matchAll(/\d+/g)].map((note) => [match[1], Number(note[0])]);
+	});
+	Object.values(tabDefinitions).forEach((tab) => {
+		if (!tab.notes) tab.notes = parseTabNotes(tab.text);
+	});
+	let selectedTab = tabDefinitions.hysteria;
+	tablature.textContent = selectedTab.text;
+
+	tabSelect?.addEventListener('change', () => {
+		if (tabTimer) {
+			window.clearInterval(tabTimer);
+			tabTimer = undefined;
+			tabButton.textContent = 'Play tab';
+		}
+		selectedTab = tabDefinitions[tabSelect.value];
+		tabTitle.textContent = selectedTab.title;
+		tablature.textContent = selectedTab.text;
+		tablature.setAttribute('aria-label', `${selectedTab.title} bass tab`);
+		statusDisplay.textContent = `${selectedTab.title} selected`;
+	});
+
+	tabButton?.addEventListener('click', () => {
+		if (tabTimer) {
+			window.clearInterval(tabTimer);
+			tabTimer = undefined;
+			tabButton.textContent = 'Play tab';
+			statusDisplay.textContent = 'Tab stopped';
+			return;
+		}
+		getAudioContext();
+		let index = 0;
+		tabButton.textContent = 'Stop tab';
+		statusDisplay.textContent = `Playing ${selectedTab.title} tab`;
+		tabTimer = window.setInterval(() => {
+			const [stringName, fret] = selectedTab.notes[index];
+			const row = neck.querySelector(`[data-string="${stringName}"]`);
+			playFret(row, fret);
+			index += 1;
+			if (index >= tabNotes.length) {
+				window.clearInterval(tabTimer);
+				tabTimer = undefined;
+				tabButton.textContent = 'Play tab';
+				statusDisplay.textContent = 'Tab complete';
+			}
+		}, 180);
+	});
 
 	neck?.addEventListener('click', (event) => {
 		const target = event.target.closest('.fret');
@@ -301,7 +492,8 @@ import Header from '../components/Header.astro';
 	}
 	.instrument,
 	.controls,
-	.scales {
+	.scales,
+	.tabs {
 		background: rgba(30, 41, 59, 0.8);
 		border: 1px solid rgb(var(--gray-light));
 		border-radius: 16px;
@@ -341,6 +533,9 @@ import Header from '../components/Header.astro';
 	.instrument-toolbar span {
 		color: rgb(var(--gray));
 		font-size: 0.75em;
+	}
+	.practice-area {
+		display: block;
 	}
 	.audio-button {
 		border: 1px solid var(--accent);
@@ -499,6 +694,49 @@ import Header from '../components/Header.astro';
 	.scale-result span {
 		color: rgb(var(--gray));
 	}
+	.tabs {
+		margin: 0;
+		padding: 1.25em;
+		border: 0;
+		border-top: 1px solid rgb(var(--gray-light));
+		border-radius: 0;
+		box-shadow: none;
+	}
+	.tab-heading {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 1em;
+	}
+	.tab-heading h2 {
+		margin-bottom: 0.25em;
+		font-size: 1.5em;
+	}
+	.tab-heading p {
+		margin: 0;
+		font-size: 0.8em;
+	}
+	.tab-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+	.tab-actions label {
+		color: rgb(var(--gray));
+		font-size: 0.7em;
+	}
+	.tablature {
+		overflow-x: auto;
+		margin: 1.25em 0 0;
+		padding: 1em;
+		border: 1px solid rgb(var(--gray-light));
+		background: var(--page-background);
+		color: #d6bf8c;
+		font-family: 'Courier New', monospace;
+		font-size: clamp(0.5em, 1.2vw, 0.72em);
+		line-height: 1.6;
+		white-space: pre;
+	}
 	.controls h2 {
 		font-size: 1.25em;
 	}
@@ -562,9 +800,13 @@ import Header from '../components/Header.astro';
 			grid-template-columns: 1fr;
 		}
 		.scale-heading,
-		.scale-result {
+		.scale-result,
+		.tab-heading {
 			align-items: flex-start;
 			flex-direction: column;
+		}
+		.tab-actions {
+			flex-wrap: wrap;
 		}
 		.scale-selectors {
 			grid-template-columns: auto 1fr;
