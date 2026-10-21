@@ -39,7 +39,7 @@ import Header from '../components/Header.astro';
 				<div class="neck" id="neck">
 					<div class="nut" aria-hidden="true"></div>
 					<div class="fret-numbers" aria-hidden="true">
-						<span>Open</span>
+						<span>0</span>
 						{Array.from({ length: 12 }, (_, index) => <span>{index + 1}</span>)}
 					</div>
 					{
@@ -102,6 +102,37 @@ import Header from '../components/Header.astro';
 					}
 				</div>
 			</section>
+
+			<section class="scales" aria-labelledby="scales-heading">
+				<div class="scale-heading">
+					<div>
+						<p class="eyebrow">Learn the neck</p>
+						<h2 id="scales-heading">Scale explorer</h2>
+						<p>Choose a root and scale to highlight its notes on the fretboard. Play the highlighted frets to practice.</p>
+					</div>
+					<div class="scale-selectors">
+						<label for="root-select">Root note</label>
+						<select id="root-select">
+							{['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map((note) => (
+								<option value={note} selected={note === 'E'}>{note}</option>
+							))}
+						</select>
+						<label for="scale-select">Scale</label>
+						<select id="scale-select">
+							<option value="major">Major</option>
+							<option value="minor">Natural minor</option>
+							<option value="majorPentatonic">Major pentatonic</option>
+							<option value="minorPentatonic">Minor pentatonic</option>
+							<option value="blues">Blues</option>
+							<option value="dorian">Dorian</option>
+						</select>
+					</div>
+				</div>
+				<div class="scale-result">
+					<strong id="scale-name">E major</strong>
+					<span id="scale-notes">E · F# · G# · A · B · C# · D#</span>
+				</div>
+			</section>
 		</main>
 		<Footer />
 	</body>
@@ -113,6 +144,10 @@ import Header from '../components/Header.astro';
 	const statusDisplay = document.querySelector('#status-display');
 	const neck = document.querySelector('#neck');
 	const toneSelect = document.querySelector('#tone-select');
+	const rootSelect = document.querySelector('#root-select');
+	const scaleSelect = document.querySelector('#scale-select');
+	const scaleName = document.querySelector('#scale-name');
+	const scaleNotes = document.querySelector('#scale-notes');
 	const keyboardRows = {
 		'`': { string: 'G', keys: ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='] },
 		q: { string: 'D', keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'] },
@@ -120,6 +155,14 @@ import Header from '../components/Header.astro';
 		z: { string: 'E', keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\\', 'shift'] },
 	};
 	const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+	const scales = {
+		major: { label: 'major', intervals: [0, 2, 4, 5, 7, 9, 11] },
+		minor: { label: 'natural minor', intervals: [0, 2, 3, 5, 7, 8, 10] },
+		majorPentatonic: { label: 'major pentatonic', intervals: [0, 2, 4, 7, 9] },
+		minorPentatonic: { label: 'minor pentatonic', intervals: [0, 3, 5, 7, 10] },
+		blues: { label: 'blues', intervals: [0, 3, 5, 6, 7, 10] },
+		dorian: { label: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
+	};
 	const tones = {
 		classic: { oscillator: 'sawtooth', filter: 1800, resonance: 1.2, attack: 0.015, release: 1.3, volume: 0.45 },
 		punchy: { oscillator: 'square', filter: 2600, resonance: 2.5, attack: 0.008, release: 0.8, volume: 0.3 },
@@ -205,6 +248,26 @@ import Header from '../components/Header.astro';
 		statusDisplay.textContent = `${toneSelect.options[toneSelect.selectedIndex].text} tone selected`;
 	});
 
+	const updateScale = () => {
+		const root = noteNames.indexOf(rootSelect.value);
+		const scale = scales[scaleSelect.value];
+		const scalePitchClasses = new Set(scale.intervals.map((interval) => (root + interval) % 12));
+		const notes = scale.intervals.map((interval) => noteNames[(root + interval) % 12]);
+		scaleName.textContent = `${rootSelect.value} ${scale.label}`;
+		scaleNotes.textContent = notes.join(' · ');
+		neck.querySelectorAll('.fret').forEach((button) => {
+			const row = button.closest('.string-row');
+			const midi = Number(row.dataset.midi) + Number(button.dataset.fret);
+			const isScaleNote = scalePitchClasses.has(midi % 12);
+			button.classList.toggle('scale-note', isScaleNote);
+			button.classList.toggle('root-note', isScaleNote && midi % 12 === root);
+		});
+	};
+
+	rootSelect?.addEventListener('change', updateScale);
+	scaleSelect?.addEventListener('change', updateScale);
+	updateScale();
+
 	window.addEventListener('keydown', (event) => {
 		if (event.repeat || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
 		const key = event.key.toLowerCase();
@@ -237,7 +300,8 @@ import Header from '../components/Header.astro';
 		text-transform: uppercase;
 	}
 	.instrument,
-	.controls {
+	.controls,
+	.scales {
 		background: rgba(30, 41, 59, 0.8);
 		border: 1px solid rgb(var(--gray-light));
 		border-radius: 16px;
@@ -339,6 +403,21 @@ import Header from '../components/Header.astro';
 	.fret.playing {
 		background: rgba(138, 180, 255, 0.28);
 	}
+	.fret.scale-note {
+		background: rgba(138, 180, 255, 0.14);
+	}
+	.fret.scale-note .fret-marker {
+		border-color: var(--accent);
+		box-shadow: 0 0 8px rgba(138, 180, 255, 0.75);
+	}
+	.fret.root-note {
+		background: rgba(226, 169, 74, 0.28);
+	}
+	.fret.root-note .fret-marker {
+		border-color: #f2b84b;
+		background: #f2b84b;
+		box-shadow: 0 0 10px rgba(242, 184, 75, 0.8);
+	}
 	.string {
 		position: absolute;
 		top: 50%;
@@ -379,6 +458,46 @@ import Header from '../components/Header.astro';
 		gap: 1.5em;
 		margin-top: 1.5em;
 		padding: 1.25em;
+	}
+	.scales {
+		margin-top: 1.5em;
+		padding: 1.25em;
+	}
+	.scale-heading {
+		display: flex;
+		justify-content: space-between;
+		gap: 1.5em;
+		align-items: end;
+	}
+	.scale-heading h2 {
+		margin-bottom: 0.25em;
+		font-size: 1.5em;
+	}
+	.scale-heading p {
+		margin: 0;
+		font-size: 0.8em;
+	}
+	.scale-selectors {
+		display: grid;
+		grid-template-columns: auto 110px auto 160px;
+		gap: 0.5em;
+		align-items: center;
+	}
+	.scale-selectors label {
+		color: rgb(var(--gray));
+		font-size: 0.7em;
+	}
+	.scale-result {
+		display: flex;
+		gap: 1em;
+		margin-top: 1em;
+		padding: 0.75em 1em;
+		border-left: 3px solid #f2b84b;
+		background: rgba(15, 23, 42, 0.6);
+		font-size: 0.8em;
+	}
+	.scale-result span {
+		color: rgb(var(--gray));
 	}
 	.controls h2 {
 		font-size: 1.25em;
@@ -441,6 +560,15 @@ import Header from '../components/Header.astro';
 		}
 		.controls {
 			grid-template-columns: 1fr;
+		}
+		.scale-heading,
+		.scale-result {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+		.scale-selectors {
+			grid-template-columns: auto 1fr;
+			width: 100%;
 		}
 	}
 </style>
