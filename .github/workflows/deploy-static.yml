@@ -1,4 +1,4 @@
-name: Deploy Static Site via AWS CDK
+name: Deploy Astro SSR Site via AWS CDK
 on:
   push:
     branches: [main]
@@ -20,9 +20,6 @@ jobs:
       - name: Install Astro dependencies
         run: npm ci
 
-      - name: Build Astro Static Site
-        run: npm run build
-
       - name: Install CDK dependencies
         run: npm ci
         working-directory: cdk
@@ -38,6 +35,6 @@ jobs:
         run: npx cdk bootstrap
         working-directory: cdk
 
-      - name: Deploy Infrastructure and Assets
+      - name: Build container and deploy infrastructure
         run: npx cdk deploy --require-approval never
         working-directory: cdk
