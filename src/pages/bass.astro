@@ -1,4 +1,4 @@
----
+﻿---
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
@@ -153,7 +153,7 @@ import Header from '../components/Header.astro';
 				</div>
 				<div class="scale-result">
 					<strong id="scale-name">E major</strong>
-					<span id="scale-notes">E · F# · G# · A · B · C# · D#</span>
+					<span id="scale-notes">E Â· F# Â· G# Â· A Â· B Â· C# Â· D#</span>
 				</div>
 			</section>
 
@@ -245,7 +245,7 @@ import Header from '../components/Header.astro';
 		oscillator.stop(now + tone.release + 0.05);
 
 		const note = `${noteNames[midi % 12]}${Math.floor(midi / 12) - 1}`;
-		noteDisplay.textContent = `${label} · ${note}`;
+		noteDisplay.textContent = `${label} Â· ${note}`;
 		statusDisplay.textContent = 'Plucked';
 		button?.classList.add('playing');
 		window.setTimeout(() => button?.classList.remove('playing'), 180);
@@ -256,7 +256,7 @@ import Header from '../components/Header.astro';
 		const stringName = row.dataset.string;
 		const midi = Number(row.dataset.midi) + fret;
 		const button = row.querySelector(`[data-fret="${fret}"]`);
-		playNote(midi, `${stringName} string · fret ${fret === 0 ? 'open' : fret}`, button);
+		playNote(midi, `${stringName} string Â· fret ${fret === 0 ? 'open' : fret}`, button);
 	};
 
 	const hysteriaText = `G|------------------------------------------------------------------------|
@@ -431,7 +431,7 @@ E|------------------------------9----7---------------------------------------:|`
 	audioButton?.addEventListener('click', () => {
 		getAudioContext();
 		audioButton.textContent = 'Sound enabled';
-		statusDisplay.textContent = 'Ready — click a fret or press a key';
+		statusDisplay.textContent = 'Ready â€” click a fret or press a key';
 	});
 
 	toneSelect?.addEventListener('change', () => {
@@ -452,7 +452,7 @@ E|------------------------------9----7---------------------------------------:|`
 		const scalePitchClasses = new Set(scale.intervals.map((interval) => (root + interval) % 12));
 		const notes = scale.intervals.map((interval) => noteNames[(root + interval) % 12]);
 		scaleName.textContent = `${rootSelect.value} ${scale.label}`;
-		scaleNotes.textContent = notes.join(' · ');
+		scaleNotes.textContent = notes.join(' Â· ');
 		neck.querySelectorAll('.fret').forEach((button) => {
 			const row = button.closest('.string-row');
 			const midi = Number(row.dataset.midi) + Number(button.dataset.fret);
@@ -840,4 +840,9 @@ E|------------------------------9----7---------------------------------------:|`
 			width: 100%;
 		}
 	}
+	/* Contrast pass: the instrument uses a dark workspace inside the light site. */
+	.bass-page .intro h1,.bass-page .intro p,.bass-page .controls h2,.bass-page .controls p,.bass-page .scale-heading h2,.bass-page .scale-heading p{color:#17211e}.bass-page .tab-heading h2,.bass-page .tab-heading p{color:#f5f7f2}
+	.bass-page .eyebrow{color:#b84b27}.bass-page .instrument,.bass-page .controls,.bass-page .scales,.bass-page .tabs{background:#1d3029;border-color:#496157;box-shadow:0 18px 45px rgba(25,45,36,.15);color:#f5f7f2}.bass-page .instrument-toolbar{background:#14241e}.bass-page .instrument-toolbar strong{color:#fff}.bass-page .instrument-toolbar span,.bass-page .toolbar-actions label,.bass-page .scale-selectors label,.bass-page .tab-actions label,.bass-page .key-map span{color:#b9c8bf}.bass-page select{border-color:#678074;background:#f5f7f2;color:#17211e}.bass-page .audio-button{border-color:#c9f36b;color:#c9f36b}.bass-page .audio-button:hover{background:#c9f36b;color:#17211e}.bass-page .controls,.bass-page .scales{background:#e8eee5;color:#17211e}.bass-page .scale-result{background:#d8e3d8;color:#17211e}.bass-page .scale-result span{color:#52645a}.bass-page .key-row strong{color:#17211e}.bass-page kbd{border-color:#9bad9e;background:#fff;color:#17211e}.bass-page .tabs{background:#1d3029}.bass-page .tablature{border-color:#496157;background:#101d18;color:#e9f6cf}
 </style>
+
+

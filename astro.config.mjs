@@ -1,4 +1,4 @@
-// @ts-check
+﻿// @ts-check
 
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
@@ -10,7 +10,7 @@ import node from '@astrojs/node';
 export default defineConfig({
   output: 'server',
      
-  site: 'https://example.com',
+  site: process.env.SITE_URL ?? 'http://localhost:4321',
   integrations: [mdx(), sitemap()],
 
   fonts: [
