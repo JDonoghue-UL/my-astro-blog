@@ -197,7 +197,6 @@ import Header from '../components/Header.astro';
 		fuzz: { oscillator: 'sawtooth', filter: 950, resonance: 5, attack: 0.005, release: 1.1, volume: 0.35, distortion: 180 },
 		muted: { oscillator: 'triangle', filter: 500, resonance: 0.8, attack: 0.003, release: 0.25, volume: 0.5 },
 	};
-	let activeString = 'G';
 	let audioContext;
 	let tabTimer;
 
@@ -257,7 +256,6 @@ import Header from '../components/Header.astro';
 		const stringName = row.dataset.string;
 		const midi = Number(row.dataset.midi) + fret;
 		const button = row.querySelector(`[data-fret="${fret}"]`);
-		activeString = stringName;
 		playNote(midi, `${stringName} string · fret ${fret === 0 ? 'open' : fret}`, button);
 	};
 
@@ -544,7 +542,10 @@ E|------------------------------9----7---------------------------------------:|`
 		font-size: 0.75em;
 	}
 	.practice-area {
-		display: block;
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(390px, 1fr);
+		gap: 1px;
+		background: rgb(var(--gray-light));
 	}
 	.audio-button {
 		border: 1px solid var(--accent);
@@ -707,11 +708,13 @@ E|------------------------------9----7---------------------------------------:|`
 		margin: 0;
 		padding: 1.25em;
 		border: 0;
-		border-top: 1px solid rgb(var(--gray-light));
 		border-radius: 0;
 		box-shadow: none;
 		position: sticky;
-		bottom: 0;
+		top: 1em;
+		align-self: start;
+		max-height: calc(100vh - 2em);
+		overflow-y: auto;
 		z-index: 2;
 		background: rgba(30, 41, 59, 0.98);
 	}
@@ -739,7 +742,7 @@ E|------------------------------9----7---------------------------------------:|`
 		font-size: 0.7em;
 	}
 	.tablature {
-		overflow-x: auto;
+		overflow-x: hidden;
 		max-height: 18em;
 		margin: 1.25em 0 0;
 		padding: 1em;
@@ -747,7 +750,7 @@ E|------------------------------9----7---------------------------------------:|`
 		background: #0a1020;
 		color: #f7e5ba;
 		font-family: 'Courier New', monospace;
-		font-size: clamp(0.68em, 1.5vw, 0.9em);
+		font-size: clamp(0.4em, 0.8vw, 0.68em);
 		line-height: 1.8;
 		white-space: pre;
 	}
@@ -792,6 +795,16 @@ E|------------------------------9----7---------------------------------------:|`
 		color: rgb(var(--black));
 		font-size: 1.5em;
 		text-align: center;
+	}
+	@media (max-width: 900px) {
+		.practice-area {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.tabs {
+			position: static;
+			max-height: none;
+			overflow-y: visible;
+		}
 	}
 	@media (max-width: 720px) {
 		.instrument-toolbar {
