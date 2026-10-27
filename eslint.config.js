@@ -5,6 +5,7 @@ export default [
   {
     ignores: [
       "dist/**",
+      "dist-static/**",
       ".astro/**",
       "cdk/**",
       "cdk.out/**",
