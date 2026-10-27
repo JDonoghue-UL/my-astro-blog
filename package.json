@@ -7,8 +7,12 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "dev:dynamic": "astro dev --port 4321",
+    "dev:both": "node scripts/launch-sites.mjs",
     "build": "astro build",
+    "build:static": "astro build --config astro.config.static.mjs",
     "preview": "astro preview",
+    "preview:static": "astro preview --config astro.config.static.mjs --port 4322",
     "astro": "astro",
     "lint": "eslint ."
   },
@@ -27,6 +31,7 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "^26.6.3",
     "eslint": "^10.11.0",
-    "eslint-plugin-astro": "^3.2.1"
+    "eslint-plugin-astro": "^3.2.1",
+    "typescript-eslint": "^8.72.0"
   }
 }

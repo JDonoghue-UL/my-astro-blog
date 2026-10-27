@@ -24,14 +24,24 @@ import Header from '../components/Header.astro';
 						<strong id="note-display">Ready to play</strong>
 						<span id="status-display">Choose a fret or press a key</span>
 					</div>
-					<button class="audio-button" id="audio-button" type="button">Enable sound</button>
+					<div class="toolbar-actions">
+						<label for="tone-select">Tone</label>
+						<select id="tone-select">
+							<option value="classic">Classic</option>
+							<option value="punchy">Punchy</option>
+							<option value="fuzz">Fuzz</option>
+							<option value="muted">Muted</option>
+						</select>
+						<button class="audio-button" id="audio-button" type="button">Enable sound</button>
+					</div>
 				</div>
 
+				<div class="practice-area">
 				<div class="neck" id="neck">
 					<div class="nut" aria-hidden="true"></div>
 					<div class="fret-numbers" aria-hidden="true">
-						<span>Open</span>
-						{Array.from({ length: 12 }, (_, index) => <span>{index + 1}</span>)}
+						<span></span>
+						{Array.from({ length: 13 }, (_, index) => <span>{index}</span>)}
 					</div>
 					{
 						[
@@ -68,23 +78,85 @@ import Header from '../components/Header.astro';
 						))
 					}
 				</div>
+				<section class="tabs" aria-labelledby="tabs-heading">
+					<div class="tab-heading">
+						<div>
+							<p class="eyebrow">Bass line</p>
+							<h2 id="tabs-heading">Hysteria</h2>
+							<p>Play along with the tab below.</p>
+						</div>
+						<div class="tab-actions">
+							<label for="tab-select">Choose a tab</label>
+							<select id="tab-select">
+								<option value="hysteria">Hysteria</option>
+								<option value="dani-california">Dani California</option>
+								<option value="santeria">Santeria</option>
+								<option value="fluorescent-adolescent">Fluorescent Adolescent</option>
+							</select>
+							<button class="audio-button" id="tab-button" type="button">Play tab</button>
+						</div>
+					</div>
+					<pre class="tablature" id="tablature" aria-label="Hysteria bass tab"></pre>
+				</section>
+				</div>
 			</section>
 
 			<section class="controls">
 				<div>
 					<h2>Keyboard controls</h2>
-					<p>Use the open-string keys to play each string, or use the fret keys below to play fretted notes.</p>
+					<p>Each keyboard row maps to one string. The keys run from open string through fret 11 from left to right.</p>
 				</div>
 				<div class="key-map" aria-label="Keyboard shortcuts">
-					{['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='].map((key, index) => (
-						<span><kbd>{key}</kbd><small>Fret {index + 1}</small></span>
-					))}
-					<span><kbd>Q</kbd><small>G open</small></span>
-					<span><kbd>A</kbd><small>D open</small></span>
-					<span><kbd>Z</kbd><small>A open</small></span>
-					<span><kbd>X</kbd><small>E open</small></span>
+					{
+						[
+							{ string: 'G', keys: ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='] },
+							{ string: 'D', keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'] },
+							{ string: 'A', keys: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", '#', 'enter'] },
+							{ string: 'E', keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\\', 'shift'] },
+						].map((row) => (
+							<div class="key-row">
+								<strong>{row.string} string</strong>
+								{row.keys.map((key, index) => (
+									<span><kbd>{key}</kbd><small>{index === 0 ? 'Open' : `Fret ${index}`}</small></span>
+								))}
+							</div>
+						))
+					}
 				</div>
 			</section>
+
+			<section class="scales" aria-labelledby="scales-heading">
+				<div class="scale-heading">
+					<div>
+						<p class="eyebrow">Learn the neck</p>
+						<h2 id="scales-heading">Scale explorer</h2>
+						<p>Choose a root and scale to highlight its notes on the fretboard. Play the highlighted frets to practice.</p>
+					</div>
+					<div class="scale-selectors">
+						<label for="root-select">Root note</label>
+						<select id="root-select">
+							{['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'].map((note) => (
+								<option value={note} selected={note === 'E'}>{note}</option>
+							))}
+						</select>
+						<label for="scale-select">Scale</label>
+						<select id="scale-select">
+							<option value="none">No scale</option>
+							<option value="major">Major</option>
+							<option value="minor">Natural minor</option>
+							<option value="majorPentatonic">Major pentatonic</option>
+							<option value="minorPentatonic">Minor pentatonic</option>
+							<option value="blues">Blues</option>
+							<option value="dorian">Dorian</option>
+						</select>
+					</div>
+				</div>
+				<div class="scale-result">
+					<strong id="scale-name">E major</strong>
+					<span id="scale-notes">E · F# · G# · A · B · C# · D#</span>
+				</div>
+			</section>
+
 		</main>
 		<Footer />
 	</body>
@@ -95,11 +167,38 @@ import Header from '../components/Header.astro';
 	const noteDisplay = document.querySelector('#note-display');
 	const statusDisplay = document.querySelector('#status-display');
 	const neck = document.querySelector('#neck');
-	const keyboardFretKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
-	const openStringKeys = { q: 'G', a: 'D', z: 'A', x: 'E' };
-	const openStringMidi = { E: 28, A: 33, D: 38, G: 43 };
+	const toneSelect = document.querySelector('#tone-select');
+	const rootSelect = document.querySelector('#root-select');
+	const scaleSelect = document.querySelector('#scale-select');
+	const scaleName = document.querySelector('#scale-name');
+	const scaleNotes = document.querySelector('#scale-notes');
+	const tabButton = document.querySelector('#tab-button');
+	const tabSelect = document.querySelector('#tab-select');
+	const tabTitle = document.querySelector('#tabs-heading');
+	const tablature = document.querySelector('#tablature');
+	const keyboardRows = {
+		'`': { string: 'G', keys: ['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='] },
+		q: { string: 'D', keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\'] },
+		a: { string: 'A', keys: ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', "'", '#', 'enter'] },
+		z: { string: 'E', keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', '\\', 'shift'] },
+	};
 	const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+	const scales = {
+		major: { label: 'major', intervals: [0, 2, 4, 5, 7, 9, 11] },
+		minor: { label: 'natural minor', intervals: [0, 2, 3, 5, 7, 8, 10] },
+		majorPentatonic: { label: 'major pentatonic', intervals: [0, 2, 4, 7, 9] },
+		minorPentatonic: { label: 'minor pentatonic', intervals: [0, 3, 5, 7, 10] },
+		blues: { label: 'blues', intervals: [0, 3, 5, 6, 7, 10] },
+		dorian: { label: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
+	};
+	const tones = {
+		classic: { oscillator: 'sawtooth', filter: 1800, resonance: 1.2, attack: 0.015, release: 1.3, volume: 0.45 },
+		punchy: { oscillator: 'square', filter: 2600, resonance: 2.5, attack: 0.008, release: 0.8, volume: 0.3 },
+		fuzz: { oscillator: 'sawtooth', filter: 950, resonance: 5, attack: 0.005, release: 1.1, volume: 0.35, distortion: 180 },
+		muted: { oscillator: 'triangle', filter: 500, resonance: 0.8, attack: 0.003, release: 0.25, volume: 0.5 },
+	};
 	let audioContext;
+	let tabTimer;
 
 	const getAudioContext = () => {
 		audioContext ??= new AudioContext();
@@ -107,25 +206,43 @@ import Header from '../components/Header.astro';
 		return audioContext;
 	};
 
+	const makeDistortionCurve = (amount) => {
+		const curve = new Float32Array(44100);
+		const scale = amount * Math.PI / 180;
+		for (let index = 0; index < curve.length; index += 1) {
+			const x = (index * 2) / curve.length - 1;
+			curve[index] = ((3 + scale) * x * 20 * Math.PI / 180) / (Math.PI + scale * Math.abs(x));
+		}
+		return curve;
+	};
+
 	const playNote = (midi, label, button) => {
 		const context = getAudioContext();
 		const now = context.currentTime;
+		const tone = tones[toneSelect.value] ?? tones.classic;
 		const oscillator = context.createOscillator();
 		const filter = context.createBiquadFilter();
 		const gain = context.createGain();
 		const frequency = 440 * 2 ** ((midi - 69) / 12);
+		const output = tone.distortion ? context.createWaveShaper() : gain;
 
-		oscillator.type = 'sawtooth';
+		oscillator.type = tone.oscillator;
 		oscillator.frequency.setValueAtTime(frequency, now);
 		filter.type = 'lowpass';
-		filter.frequency.setValueAtTime(1800, now);
-		filter.Q.setValueAtTime(1.2, now);
+		filter.frequency.setValueAtTime(tone.filter, now);
+		filter.Q.setValueAtTime(tone.resonance, now);
 		gain.gain.setValueAtTime(0.0001, now);
-		gain.gain.exponentialRampToValueAtTime(0.45, now + 0.015);
-		gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.3);
-		oscillator.connect(filter).connect(gain).connect(context.destination);
+		gain.gain.exponentialRampToValueAtTime(tone.volume, now + tone.attack);
+		gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.release);
+		if (tone.distortion) {
+			output.curve = makeDistortionCurve(tone.distortion);
+			output.oversample = '4x';
+		}
+		oscillator.connect(filter).connect(gain);
+		if (tone.distortion) gain.connect(output).connect(context.destination);
+		else gain.connect(context.destination);
 		oscillator.start(now);
-		oscillator.stop(now + 1.35);
+		oscillator.stop(now + tone.release + 0.05);
 
 		const note = `${noteNames[midi % 12]}${Math.floor(midi / 12) - 1}`;
 		noteDisplay.textContent = `${label} · ${note}`;
@@ -135,11 +252,175 @@ import Header from '../components/Header.astro';
 	};
 
 	const playFret = (row, fret) => {
+		if (!row) return;
 		const stringName = row.dataset.string;
 		const midi = Number(row.dataset.midi) + fret;
 		const button = row.querySelector(`[data-fret="${fret}"]`);
 		playNote(midi, `${stringName} string · fret ${fret === 0 ? 'open' : fret}`, button);
 	};
+
+	const hysteriaText = `G|------------------------------------------------------------------------|
+D|------------------------------------------------------------------------|
+A|-0-0-10-0-10-12-0-10-0-7-0-8-8-7-5-7------------------------------------|
+E|-------------------------------------0-0-10-0-10-12-0-15-0-12-0-15-15-12|
+
+G|-------------------------------------------------------------------------|
+D|-------0-0-10-0-10-12-0-10-0-10-9-0-9-8-0-8-7----------------------------|
+A|----------------------------------------------0-10-0-10-12-0-10-0-7-0-8-8|
+E|-15-17-------------------------------------------------------------------|
+
+G|------|
+D|------|
+A|-7-5-7|
+E|------|`;
+	const tabDefinitions = {
+		hysteria: {
+			title: 'Hysteria',
+			text: hysteriaText,
+			notes: [
+				['A', 0], ['A', 0], ['A', 10], ['A', 0], ['A', 10], ['A', 12], ['A', 0], ['A', 10], ['A', 0], ['A', 7], ['A', 0], ['A', 8], ['A', 8], ['A', 7], ['A', 5], ['A', 7],
+				['E', 0], ['E', 0], ['E', 10], ['E', 0], ['E', 10], ['E', 12], ['E', 0], ['E', 15], ['E', 0], ['E', 12], ['E', 0], ['E', 15], ['E', 15], ['E', 12], ['E', 15], ['E', 17],
+				['D', 0], ['D', 0], ['D', 10], ['D', 0], ['D', 10], ['D', 12], ['D', 0], ['D', 10], ['D', 0], ['D', 10], ['D', 9], ['D', 0], ['D', 9], ['D', 8], ['D', 0], ['D', 8], ['D', 7],
+				['A', 0], ['A', 10], ['A', 0], ['A', 10], ['A', 12], ['A', 0], ['A', 10], ['A', 0], ['A', 7], ['A', 0], ['A', 8], ['A', 8], ['A', 7], ['A', 5], ['A', 7],
+			],
+		},
+		'dani-california': {
+			title: 'Dani California',
+			text: `G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7------------|
+D|-----7------5-3-------7----------|
+A|----------------5-5------3-5-5---|
+E|-5-5----3-3------------5---------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7----------------|
+D|-----7------5-3--------------5-------|
+A|----------------5-5----5h7p5---7-----|
+E|-5-5----3-3----------------------5---|
+
+G|--------------------7-----5----------|
+D|-----7------5-3-------5h7---5---5----|
+A|----------------5-5-----------7------|
+E|-5-5----3-3--------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5-------------|
+A|----------------5-5---------7-5---------|
+E|-5-5----3-3-----------------------------|
+
+G|--------------------7-------------------|
+D|-----7------5-3-------5h7p5--5---5------|
+A|----------------5-5------------7---7----|
+E|-5-5----3-3-----------------------------|`,
+		},
+		santeria: {
+			title: 'Santeria',
+			text: `G|-----------------------8--------------|
+D|---------6----------------------------|
+A|--7-------------4----------------7h9--|
+E|-----------------------7------7h9-----|
+
+G|----------------------------------------------|
+D|---------------7h9-7h9---6--6---6-6--0-6-6----|
+A|--7--7---7-7-----------------6h8--------------|
+E|------7h9-------------------------------------|
+
+G|--------------------------------------------|
+D|--------------------------------------------|
+A|--4--4-4--4-4--4-4-------------------7h9----|
+E|---------------------7--0-7-7-7--07h9-------|
+
+G|---------------------------------------------|
+D|---------------7h9-7h9---6--6----------------|
+A|--7--7---7-7-----------------6-6--------4h6--|
+E|------7h9------------------------4--04h6-----|
+
+G|-------------------------------------------|
+D|-------------------------------------------|
+A|--4--4---4-4---0-4-7-----------------------|
+E|------4h6------------7--0-7-7-7-7-7-7------|`,
+		},
+		'fluorescent-adolescent': {
+			title: 'Fluorescent Adolescent',
+			text: `G|-----------------------------|
+D|---------------444-----------|
+A|-7-7-7--4-4-4-------2-2-2----|
+E|-----------------------------|
+
+G|--------------6-----6---4--------6-----4--4--------|
+D|--2------------------------4-----------------------|
+A|-----------2-4----4---2-------------2----2---------|
+E|-0---0-2-4----------------2---2-2-----------3/4-2--|
+
+G|---------------------------------------------------------------------------:|
+D|----------------9-11-11-11-11---11---9----------------11-9-9-9-9----9------:|
+A|-7-7-7-7-7-9/11-------------------------9-9-9-9-9-9-9------------11---11-9-:|
+E|------------------------------9----7---------------------------------------:|`,
+		},
+	};
+
+	const parseTabNotes = (text) => text.split('\n').flatMap((line) => {
+		const match = line.match(/^([GDAE])\|([^|]*)/);
+		if (!match) return [];
+		return [...match[2].matchAll(/\d+/g)].map((note) => [match[1], Number(note[0])]);
+	});
+	Object.values(tabDefinitions).forEach((tab) => {
+		if (!tab.notes) tab.notes = parseTabNotes(tab.text);
+	});
+	let selectedTab = tabDefinitions.hysteria;
+	tablature.textContent = selectedTab.text;
+
+	tabSelect?.addEventListener('change', () => {
+		if (tabTimer) {
+			window.clearInterval(tabTimer);
+			tabTimer = undefined;
+			tabButton.textContent = 'Play tab';
+		}
+		selectedTab = tabDefinitions[tabSelect.value];
+		tabTitle.textContent = selectedTab.title;
+		tablature.textContent = selectedTab.text;
+		tablature.setAttribute('aria-label', `${selectedTab.title} bass tab`);
+		statusDisplay.textContent = `${selectedTab.title} selected`;
+	});
+
+	tabButton?.addEventListener('click', () => {
+		if (tabTimer) {
+			window.clearInterval(tabTimer);
+			tabTimer = undefined;
+			tabButton.textContent = 'Play tab';
+			statusDisplay.textContent = 'Tab stopped';
+			return;
+		}
+		getAudioContext();
+		let index = 0;
+		tabButton.textContent = 'Stop tab';
+		statusDisplay.textContent = `Playing ${selectedTab.title} tab`;
+		tabTimer = window.setInterval(() => {
+			const [stringName, fret] = selectedTab.notes[index];
+			const row = neck.querySelector(`[data-string="${stringName}"]`);
+			playFret(row, fret);
+			index += 1;
+			if (index >= tabNotes.length) {
+				window.clearInterval(tabTimer);
+				tabTimer = undefined;
+				tabButton.textContent = 'Play tab';
+				statusDisplay.textContent = 'Tab complete';
+			}
+		}, 180);
+	});
 
 	neck?.addEventListener('click', (event) => {
 		const target = event.target.closest('.fret');
@@ -153,19 +434,46 @@ import Header from '../components/Header.astro';
 		statusDisplay.textContent = 'Ready — click a fret or press a key';
 	});
 
+	toneSelect?.addEventListener('change', () => {
+		statusDisplay.textContent = `${toneSelect.options[toneSelect.selectedIndex].text} tone selected`;
+	});
+
+	const updateScale = () => {
+		if (scaleSelect.value === 'none') {
+			scaleName.textContent = 'No scale selected';
+			scaleNotes.textContent = 'Scale highlighting is off';
+			neck.querySelectorAll('.fret').forEach((button) => {
+				button.classList.remove('scale-note', 'root-note');
+			});
+			return;
+		}
+		const root = noteNames.indexOf(rootSelect.value);
+		const scale = scales[scaleSelect.value];
+		const scalePitchClasses = new Set(scale.intervals.map((interval) => (root + interval) % 12));
+		const notes = scale.intervals.map((interval) => noteNames[(root + interval) % 12]);
+		scaleName.textContent = `${rootSelect.value} ${scale.label}`;
+		scaleNotes.textContent = notes.join(' · ');
+		neck.querySelectorAll('.fret').forEach((button) => {
+			const row = button.closest('.string-row');
+			const midi = Number(row.dataset.midi) + Number(button.dataset.fret);
+			const isScaleNote = scalePitchClasses.has(midi % 12);
+			button.classList.toggle('scale-note', isScaleNote);
+			button.classList.toggle('root-note', isScaleNote && midi % 12 === root);
+		});
+	};
+
+	rootSelect?.addEventListener('change', updateScale);
+	scaleSelect?.addEventListener('change', updateScale);
+	updateScale();
+
 	window.addEventListener('keydown', (event) => {
 		if (event.repeat || event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
 		const key = event.key.toLowerCase();
-		if (openStringKeys[key]) {
-			const stringName = openStringKeys[key];
-			const row = neck.querySelector(`[data-string="${stringName}"]`);
-			playFret(row, 0);
-			return;
-		}
-		const fretIndex = keyboardFretKeys.indexOf(event.key);
-		if (fretIndex < 0) return;
-		const rows = [...neck.querySelectorAll('.string-row')];
-		playFret(rows[0], fretIndex + 1);
+		const keyboardRow = Object.values(keyboardRows).find((row) => row.keys.includes(key));
+		if (!keyboardRow) return;
+		const fret = keyboardRow.keys.indexOf(key);
+		const row = neck.querySelector(`[data-string="${keyboardRow.string}"]`);
+		playFret(row, fret);
 	});
 </script>
 
@@ -190,7 +498,9 @@ import Header from '../components/Header.astro';
 		text-transform: uppercase;
 	}
 	.instrument,
-	.controls {
+	.controls,
+	.scales,
+	.tabs {
 		background: rgba(30, 41, 59, 0.8);
 		border: 1px solid rgb(var(--gray-light));
 		border-radius: 16px;
@@ -205,6 +515,24 @@ import Header from '../components/Header.astro';
 		padding: 1em 1.25em;
 		background: rgba(15, 23, 42, 0.7);
 	}
+	.toolbar-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+	.toolbar-actions label {
+		color: rgb(var(--gray));
+		font-size: 0.7em;
+	}
+	select {
+		border: 1px solid rgb(var(--gray-light));
+		border-radius: 999px;
+		padding: 0.5em 0.75em;
+		background: var(--page-background);
+		color: rgb(var(--black));
+		font: inherit;
+		font-size: 0.7em;
+	}
 	.instrument-toolbar strong,
 	.instrument-toolbar span {
 		display: block;
@@ -212,6 +540,12 @@ import Header from '../components/Header.astro';
 	.instrument-toolbar span {
 		color: rgb(var(--gray));
 		font-size: 0.75em;
+	}
+	.practice-area {
+		display: grid;
+		grid-template-columns: minmax(0, 1.25fr) minmax(390px, 1fr);
+		gap: 1px;
+		background: rgb(var(--gray-light));
 	}
 	.audio-button {
 		border: 1px solid var(--accent);
@@ -274,6 +608,21 @@ import Header from '../components/Header.astro';
 	.fret.playing {
 		background: rgba(138, 180, 255, 0.28);
 	}
+	.fret.scale-note {
+		background: rgba(138, 180, 255, 0.14);
+	}
+	.fret.scale-note .fret-marker {
+		border-color: var(--accent);
+		box-shadow: 0 0 8px rgba(138, 180, 255, 0.75);
+	}
+	.fret.root-note {
+		background: rgba(226, 169, 74, 0.28);
+	}
+	.fret.root-note .fret-marker {
+		border-color: #f2b84b;
+		background: #f2b84b;
+		box-shadow: 0 0 10px rgba(242, 184, 75, 0.8);
+	}
 	.string {
 		position: absolute;
 		top: 50%;
@@ -315,6 +664,96 @@ import Header from '../components/Header.astro';
 		margin-top: 1.5em;
 		padding: 1.25em;
 	}
+	.scales {
+		margin-top: 1.5em;
+		padding: 1.25em;
+	}
+	.scale-heading {
+		display: flex;
+		justify-content: space-between;
+		gap: 1.5em;
+		align-items: end;
+	}
+	.scale-heading h2 {
+		margin-bottom: 0.25em;
+		font-size: 1.5em;
+	}
+	.scale-heading p {
+		margin: 0;
+		font-size: 0.8em;
+	}
+	.scale-selectors {
+		display: grid;
+		grid-template-columns: auto 110px auto 160px;
+		gap: 0.5em;
+		align-items: center;
+	}
+	.scale-selectors label {
+		color: rgb(var(--gray));
+		font-size: 0.7em;
+	}
+	.scale-result {
+		display: flex;
+		gap: 1em;
+		margin-top: 1em;
+		padding: 0.75em 1em;
+		border-left: 3px solid #f2b84b;
+		background: rgba(15, 23, 42, 0.6);
+		font-size: 0.8em;
+	}
+	.scale-result span {
+		color: rgb(var(--gray));
+	}
+	.tabs {
+		margin: 0;
+		padding: 1.25em;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		position: sticky;
+		top: 1em;
+		align-self: start;
+		max-height: calc(100vh - 2em);
+		overflow-y: auto;
+		z-index: 2;
+		background: rgba(30, 41, 59, 0.98);
+	}
+	.tab-heading {
+		display: flex;
+		align-items: end;
+		justify-content: space-between;
+		gap: 1em;
+	}
+	.tab-heading h2 {
+		margin-bottom: 0.25em;
+		font-size: 1.5em;
+	}
+	.tab-heading p {
+		margin: 0;
+		font-size: 0.8em;
+	}
+	.tab-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
+	.tab-actions label {
+		color: rgb(var(--gray));
+		font-size: 0.7em;
+	}
+	.tablature {
+		overflow-x: hidden;
+		max-height: 18em;
+		margin: 1.25em 0 0;
+		padding: 1em;
+		border: 1px solid rgb(var(--gray-light));
+		background: #0a1020;
+		color: #f7e5ba;
+		font-family: 'Courier New', monospace;
+		font-size: clamp(0.4em, 0.8vw, 0.68em);
+		line-height: 1.8;
+		white-space: pre;
+	}
 	.controls h2 {
 		font-size: 1.25em;
 	}
@@ -323,10 +762,19 @@ import Header from '../components/Header.astro';
 		font-size: 0.8em;
 	}
 	.key-map {
+		display: grid;
+		gap: 0.55em;
+	}
+	.key-row {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.65em;
+		gap: 0.4em;
 		align-items: center;
+	}
+	.key-row strong {
+		width: 4em;
+		color: rgb(var(--black));
+		font-size: 0.65em;
 	}
 	.key-map span {
 		display: flex;
@@ -348,7 +796,21 @@ import Header from '../components/Header.astro';
 		font-size: 1.5em;
 		text-align: center;
 	}
+	@media (max-width: 900px) {
+		.practice-area {
+			grid-template-columns: minmax(0, 1fr);
+		}
+		.tabs {
+			position: static;
+			max-height: none;
+			overflow-y: visible;
+		}
+	}
 	@media (max-width: 720px) {
+		.instrument-toolbar {
+			align-items: flex-start;
+			flex-direction: column;
+		}
 		.fret-numbers,
 		.string-row {
 			grid-template-columns: 34px repeat(13, minmax(25px, 1fr));
@@ -363,6 +825,19 @@ import Header from '../components/Header.astro';
 		}
 		.controls {
 			grid-template-columns: 1fr;
+		}
+		.scale-heading,
+		.scale-result,
+		.tab-heading {
+			align-items: flex-start;
+			flex-direction: column;
+		}
+		.tab-actions {
+			flex-wrap: wrap;
+		}
+		.scale-selectors {
+			grid-template-columns: auto 1fr;
+			width: 100%;
 		}
 	}
 </style>

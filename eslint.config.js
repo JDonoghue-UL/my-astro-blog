@@ -1,13 +1,25 @@
+import tseslint from "typescript-eslint"
 import eslintPluginAstro from "eslint-plugin-astro"
 
 export default [
-  // add more generic rule sets here, such as:
-  // js.configs.recommended,
+  {
+    ignores: [
+      "dist/**",
+      "dist-static/**",
+      ".astro/**",
+      "cdk/**",
+      "cdk.out/**",
+      "node_modules/**",
+      "playwright-report/**",
+      "test-results/**",
+    ],
+  },
+  ...tseslint.configs.recommended,
   ...eslintPluginAstro.configs.recommended,
   {
     rules: {
-      // override/add rules settings here, such as:
-      // "astro/no-set-html-directive": "error"
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "warn",
     },
   },
 ]
