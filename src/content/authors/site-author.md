@@ -1,5 +1,5 @@
----
-name: 'ISE DevOps Team'
-bio: 'We write about the tools, practices, and lessons that help us build and operate better software.'
-photo: '../../assets/ISE-Logo.png'
+﻿---
+name: 'Jack Donoghue'
+bio: 'I am Jack Donoghue, an ISE student exploring DevOps, creative technology, and music.'
+photo: '../../assets/JDonoghue.png'
 ---

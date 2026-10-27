@@ -1,114 +1,12 @@
----
-import { Image } from 'astro:assets';
+﻿---
 import { getCollection } from 'astro:content';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
-
-const posts = (await getCollection('blog')).sort(
-	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
-);
+const posts = (await getCollection('blog')).sort((a,b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
-
-<!doctype html>
-<html lang="en">
-	<head>
-		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
-		<style>
-			main {
-				width: 960px;
-			}
-			ul {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 2rem;
-				list-style-type: none;
-				margin: 0;
-				padding: 0;
-			}
-			ul li {
-				width: calc(50% - 1rem);
-			}
-			ul li * {
-				text-decoration: none;
-				transition: 0.2s ease;
-			}
-			ul li:first-child {
-				width: 100%;
-				margin-bottom: 1rem;
-				text-align: center;
-			}
-			ul li:first-child img {
-				width: 100%;
-			}
-			ul li:first-child .title {
-				font-size: 2.369rem;
-			}
-			ul li img {
-				margin-bottom: 0.5rem;
-				border-radius: 12px;
-			}
-			ul li a {
-				display: block;
-			}
-			.title {
-				margin: 0;
-				color: rgb(var(--black));
-				line-height: 1;
-			}
-			.date {
-				margin: 0;
-				color: rgb(var(--gray));
-			}
-			ul li a:hover h4,
-			ul li a:hover .date {
-				color: rgb(var(--accent));
-			}
-			ul a:hover img {
-				box-shadow: var(--box-shadow);
-			}
-			@media (max-width: 720px) {
-				ul {
-					gap: 0.5em;
-				}
-				ul li {
-					width: 100%;
-					text-align: center;
-				}
-				ul li:first-child {
-					margin-bottom: 0;
-				}
-				ul li:first-child .title {
-					font-size: 1.563em;
-				}
-			}
-		</style>
-	</head>
-	<body>
-		<Header />
-		<main>
-			<section>
-				<ul>
-					{
-						posts.map((post) => (
-							<li>
-								<a href={`/blog/${post.id}/`}>
-									{post.data.heroImage && (
-										<Image width={720} height={360} src={post.data.heroImage} alt="" />
-									)}
-									<h4 class="title">{post.data.title}</h4>
-									<p class="date">
-										<FormattedDate date={post.data.pubDate} />
-									</p>
-								</a>
-							</li>
-						))
-					}
-				</ul>
-			</section>
-		</main>
-		<Footer />
-	</body>
-</html>
+<!doctype html><html lang="en"><head><BaseHead title={SITE_TITLE + ' · Journal'} description={SITE_DESCRIPTION} /></head><body><Header /><main class="journal"><header class="journal-head"><p class="eyebrow">The journal</p><h1>Small notes.<br /><em>Long echoes.</em></h1><p>Working notes from the intersection of technology, craft, and everyday life.</p></header><div class="journal-list">{posts.map((post,index) => <a class="journal-item" href={`/blog/${post.id}/`}><span class="journal-index">0{index+1}</span><span class="journal-content"><span class="journal-date"><FormattedDate date={post.data.pubDate} /></span><strong>{post.data.title}</strong><span>{post.data.description}</span></span><span class="journal-arrow">↗</span></a>)}</div></main><Footer /></body></html>
+<style>.journal{max-width:960px}.journal-head{padding:25px 0 85px;border-bottom:1px solid var(--line)}.journal-head h1{margin:15px 0 20px}.journal-head h1 em{font-style:normal;color:var(--orange)}.journal-head>p:last-child{max-width:470px;color:var(--muted);font-size:1.05rem}.journal-list{border-bottom:1px solid var(--line)}.journal-item{display:grid;grid-template-columns:70px 1fr 35px;gap:20px;align-items:center;padding:30px 0;border-bottom:1px solid var(--line);text-decoration:none;transition:padding .2s}.journal-item:hover{padding-left:12px;padding-right:12px;background:#eaf0e5}.journal-index,.journal-date{font:11px 'DM Mono',monospace;color:var(--orange)}.journal-content{display:grid;gap:7px}.journal-content strong{font-size:1.4rem;letter-spacing:-.04em}.journal-content span:last-child{color:var(--muted);font-size:.9rem}.journal-arrow{font-size:1.4rem;text-align:right}@media(max-width:600px){.journal-item{grid-template-columns:35px 1fr 20px}.journal-content strong{font-size:1.1rem}}
+</style>
