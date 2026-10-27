@@ -1,4 +1,4 @@
-name: Deploy Astro SSR Site via AWS CDK
+name: Deploy Astro Static and SSR Sites via AWS CDK
 on:
   push:
     branches: [main]
@@ -20,6 +20,9 @@ jobs:
       - name: Install Astro dependencies
         run: npm ci
 
+      - name: Build static site
+        run: npm run build:static
+
       - name: Install CDK dependencies
         run: npm ci
         working-directory: cdk
@@ -36,5 +39,17 @@ jobs:
         working-directory: cdk
 
       - name: Build container and deploy infrastructure
-        run: npx cdk deploy --require-approval never
+        run: npx cdk deploy --require-approval never --outputs-file cdk-outputs.json
         working-directory: cdk
+
+      - name: Publish deployed site links
+        working-directory: cdk
+        run: |
+          STATIC_URL=$(jq -r '.StaticSiteStack.StaticSiteUrl' cdk-outputs.json)
+          DYNAMIC_URL=$(jq -r '.StaticSiteStack.SiteUrl' cdk-outputs.json)
+          {
+            echo "## Deployed sites"
+            echo ""
+            echo "- Static site: [$STATIC_URL]($STATIC_URL)"
+            echo "- Dynamic SSR site: [$DYNAMIC_URL]($DYNAMIC_URL)"
+          } >> "$GITHUB_STEP_SUMMARY"
