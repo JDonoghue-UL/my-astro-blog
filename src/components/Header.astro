@@ -4,8 +4,33 @@ import HeaderLink from './HeaderLink.astro';
 ---
 <header class="site-header">
   <nav class="nav-shell" aria-label="Primary navigation">
-    <a class="brand" href="/" aria-label="Field Notes home"><span class="brand-mark">FN</span><span>{SITE_TITLE}</span></a>
+    <a class="brand" href="/" aria-label="The Studio home"><span class="brand-mark">TS</span><span>{SITE_TITLE}</span></a>
     <div class="internal-links"><HeaderLink href="/">Home</HeaderLink><HeaderLink href="/blog">Journal</HeaderLink><HeaderLink href="/bass">Practice room</HeaderLink><HeaderLink href="/about">About</HeaderLink></div>
-    <span class="header-note">A personal field guide</span>
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false"><span class="theme-icon" aria-hidden="true">☾</span><span class="theme-label">Dark mode</span></button><span class="header-note">A personal field guide</span>
   </nav>
 </header>
+
+<script>
+  const root = document.documentElement;
+  const toggle = document.querySelector('#theme-toggle');
+  const savedTheme = localStorage.getItem('studio-theme');
+  const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  root.dataset.theme = initialTheme;
+
+  const syncThemeToggle = () => {
+    const dark = root.dataset.theme === 'dark';
+    toggle?.setAttribute('aria-pressed', String(dark));
+    toggle?.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    const label = toggle?.querySelector('.theme-label');
+    const icon = toggle?.querySelector('.theme-icon');
+    if (label) label.textContent = dark ? 'Light mode' : 'Dark mode';
+    if (icon) icon.textContent = dark ? '☀' : '☾';
+  };
+
+  syncThemeToggle();
+  toggle?.addEventListener('click', () => {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('studio-theme', root.dataset.theme);
+    syncThemeToggle();
+  });
+</script>
