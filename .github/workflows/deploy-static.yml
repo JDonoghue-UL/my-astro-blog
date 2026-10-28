@@ -2,6 +2,13 @@ name: Deploy Astro Static and SSR Sites via AWS CDK
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy_ref:
+        description: 'Commit SHA or tag to deploy (use a previous known-good version for rollback)'
+        required: true
+        default: main
+        type: string
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.deploy_ref || github.sha }}
 
       - name: Setup Node.js Runtime
         uses: actions/setup-node@v4
@@ -47,9 +56,11 @@ jobs:
         run: |
           STATIC_URL=$(jq -r '.StaticSiteStack.StaticSiteUrl' cdk-outputs.json)
           DYNAMIC_URL=$(jq -r '.StaticSiteStack.SiteUrl' cdk-outputs.json)
+          DEPLOYED_REF=$(git -C .. rev-parse HEAD)
           {
             echo "## Deployed sites"
             echo ""
+            echo "- Deploy ref: ${DEPLOYED_REF}"
             echo "- Static site: [$STATIC_URL]($STATIC_URL)"
             echo "- Dynamic SSR site: [$DYNAMIC_URL]($DYNAMIC_URL)"
           } >> "$GITHUB_STEP_SUMMARY"
